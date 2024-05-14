@@ -19,7 +19,7 @@ app.use('/videos', express.static(staticVideosPath));
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'public/images'); 
+        cb(null, 'public/images');
     },
     filename: (req, file, cb) => {
         cb(null, `${Date.now()}-${file.originalname}`);
@@ -78,18 +78,18 @@ app.get('/videos/:id', (req, res) => {
 });
 
 app.post('/videos', upload.single('image'), (req, res) => {
-    const { title, description } = req.body;
+    const { title, description, channel } = req.body;
     const imageUrl = req.file ? `/images/${req.file.filename}` : '/images/default-thumbnail.jpg';
     const newVideo = {
         id: uuidv4(),
         title,
         description,
-        channel: 'Default Channel',
+        channel: channel || 'Default Channel',
         image: imageUrl,
         views: '0',
         likes: '0',
         duration: '0:00',
-        video: '/videos/stream.mp4', 
+        video: '/videos/stream.mp4',
         timestamp: Date.now(),
         comments: []
     };
