@@ -19,7 +19,7 @@ app.use('/videos', express.static(staticVideosPath));
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'public/images'); // или 'public/videos', если это видео
+        cb(null, 'public/images'); 
     },
     filename: (req, file, cb) => {
         cb(null, `${Date.now()}-${file.originalname}`);
@@ -89,7 +89,7 @@ app.post('/videos', upload.single('image'), (req, res) => {
         views: '0',
         likes: '0',
         duration: '0:00',
-        video: '/videos/stream.mp4', // путь к видео, если оно уже есть
+        video: '/videos/stream.mp4', 
         timestamp: Date.now(),
         comments: []
     };
