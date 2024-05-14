@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrainFlix API Documentation</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>BrainFlix API Documentation</h1>
+        <p>The URL for the API is <code>https://brainflixback-f347c94ccf8f.herokuapp.com/</code></p>
+    </header>
+
+    <section>
+        <h2>Authentication</h2>
+        <p>To register with the API and get a key, make a GET request to <code>/register</code>. You can do this with the browser and you only need to do it once. Store the key in a global variable in your website.</p>
+        <pre><code>GET https://brainflixback-f347c94ccf8f.herokuapp.com/register</code></pre>
+        <p>Example response:</p>
+        <pre><code>{
+  "api_key": "your_generated_api_key"
+}</code></pre>
+        <p>Store the <code>api_key</code> and append <code>?api_key=your_api_key</code> to each of your API request URLs (except for <code>/register</code>).</p>
+    </section>
+
+    <section>
+        <h2>Routes</h2>
+
+        <div class="route">
+            <h3>GET /videos</h3>
+            <p>Returns an array of video objects. Contains only enough information to display in the sidebar.</p>
+            <pre><code>GET https://brainflixback-f347c94ccf8f.herokuapp.com/videos?api_key=your_api_key</code></pre>
+            <p>Example response:</p>
+            <pre><code>[
+  {
+    "id": "84e96018-4022-434e-80bf-000ce4cd12b8",
+    "title": "The Future of Artificial Intelligence",
+    "channel": "Aiden Thompson",
+    "image": "https://brainflixback-f347c94ccf8f.herokuapp.com/images/image0.jpg"
+  },
+  {
+    "id": "c05b9a93-8682-4ab6-aff2-92ebb4bbfc14",
+    "title": "Exploring Cities of Europe",
+    "channel": "Maria Aziz",
+    "image": "https://brainflixback-f347c94ccf8f.herokuapp.com/images/image1.jpg"
+  }
+]</code></pre>
+        </div>
+
+        <div class="route">
+            <h3>GET /videos/:id</h3>
+            <p>Returns a detailed object of a single video, including the list of comments for that video.</p>
+            <pre><code>GET https://brainflixback-f347c94ccf8f.herokuapp.com/videos/:id?api_key=your_api_key</code></pre>
+            <p>Example response:</p>
+            <pre><code>{
+  "id": "84e96018-4022-434e-80bf-000ce4cd12b8",
+  "title": "The Future of Artificial Intelligence",
+  "channel": "Aiden Thompson",
+  "image": "https://brainflixback-f347c94ccf8f.herokuapp.com/images/image0.jpg",
+  "description": "Explore the cutting-edge developments and predictions for Artificial Intelligence...",
+  "views": "980,544",
+  "likes": "22,479",
+  "duration": "4:01",
+  "video": "https://brainflixback-f347c94ccf8f.herokuapp.com/stream",
+  "timestamp": 1691471862000,
+  "comments": [
+    {
+      "name": "Noah Duncan",
+      "comment": "Your insights into the future of AI are enlightening...",
+      "id": "35bba08b-1b51-4153-ba7e-6da76b5ec1b9",
+      "likes": 0,
+      "timestamp": 1691731062000
+    }
+  ]
+}</code></pre>
+        </div>
+
+        <div class="route">
+            <h3>POST /videos/:id/comments</h3>
+            <p>Creates a new comment for a specific video.</p>
+            <pre><code>POST https://brainflixback-f347c94ccf8f.herokuapp.com/videos/:id/comments?api_key=your_api_key</code></pre>
+            <p>Example request body:</p>
+            <pre><code>{
+  "name": "Trudy Jankowski",
+  "comment": "I really enjoyed this video! Thanks for posting"
+}</code></pre>
+            <p>Example response:</p>
+            <pre><code>{
+  "id": "new_comment_id",
+  "name": "Trudy Jankowski",
+  "comment": "I really enjoyed this video! Thanks for posting",
+  "likes": 0,
+  "timestamp": 1691731062000
+}</code></pre>
+        </div>
+
+        <div class="route">
+            <h3>DELETE /videos/:videoId/comments/:commentId</h3>
+            <p>Deletes the given comment and returns it in the response body.</p>
+            <pre><code>DELETE https://brainflixback-f347c94ccf8f.herokuapp.com/videos/:videoId/comments/:commentId?api_key=your_api_key</code></pre>
+            <p>Example response:</p>
+            <pre><code>{
+  "id": "ade82e25-6c87-4403-ba35-47bdff93a51c",
+  "name": "Maria Aziz",
+  "comment": "Your travel diaries are like a passport to wanderlust! Each city comes alive through your lens...",
+  "timestamp": 1690348662000
+}</code></pre>
+        </div>
+
+        <div class="route">
+            <h3>POST /videos/:id/like</h3>
+            <p>Increments the like count of a specific video.</p>
+            <pre><code>POST https://brainflixback-f347c94ccf8f.herokuapp.com/videos/:id/like?api_key=your_api_key</code></pre>
+            <p>Example response:</p>
+            <pre><code>{
+  "id": "84e96018-4022-434e-80bf-000ce4cd12b8",
+  "title": "The Future of Artificial Intelligence",
+  "channel": "Aiden Thompson",
+  "image": "https://brainflixback-f347c94ccf8f.herokuapp.com/images/image0.jpg",
+  "description": "Explore the cutting-edge developments and predictions for Artificial Intelligence...",
+  "views": "980,544",
+  "likes": "22,480",
+  "duration": "4:01",
+  "video": "https://brainflixback-f347c94ccf8f.herokuapp.com/stream",
+  "timestamp": 1691471862000,
+  "comments": [
+    {
+      "name": "Noah Duncan",
+      "comment": "Your insights into the future of AI are enlightening...",
+      "id": "35bba08b-1b51-4153-ba7e-6da76b5ec1b9",
+      "likes": 0,
+      "timestamp": 1691731062000
+    }
+  ]
+}</code></pre>
+        </div>
+    </section>
+</body>
+</html>
