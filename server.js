@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
@@ -11,11 +12,13 @@ const API_KEY = process.env.API_KEY || 'martik';
 const dataFilePath = path.join(__dirname, 'data.json');
 const staticImagesPath = path.join(__dirname, 'public', 'images');
 const staticVideosPath = path.join(__dirname, 'public', 'videos');
+const docsPath = path.join(__dirname, 'docs'); 
 
 app.use(cors());
 app.use(express.json());
 app.use('/images', express.static(staticImagesPath));
 app.use('/videos', express.static(staticVideosPath));
+app.use('/docs', express.static(docsPath)); 
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -37,7 +40,12 @@ const apiKeyMiddleware = (req, res, next) => {
     }
 };
 
-app.use(apiKeyMiddleware);
+// Apply API key middleware to all routes except documentation
+app.use('/videos', apiKeyMiddleware);
+app.use('/videos/:id', apiKeyMiddleware);
+app.use('/videos/:id/comments', apiKeyMiddleware);
+app.use('/videos/:id/comments/:commentId', apiKeyMiddleware);
+app.use('/videos/:id/like', apiKeyMiddleware);
 
 const readData = () => {
     const data = fs.readFileSync(dataFilePath);
