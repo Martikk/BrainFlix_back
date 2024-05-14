@@ -9,16 +9,21 @@ const multer = require('multer');
 const app = express();
 const PORT = process.env.PORT || 8080;
 const API_KEY = process.env.API_KEY || 'martik';
-const dataFilePath = path.join(__dirname, 'data.json');
-const staticImagesPath = path.join(__dirname, 'public', 'images');
-const staticVideosPath = path.join(__dirname, 'public', 'videos');
-const docsPath = path.join(__dirname, 'docs'); 
+const dataFilePath = process.env.DATA_FILE_PATH || path.join(__dirname, 'data.json');
+const staticImagesPath = process.env.STATIC_IMAGES_PATH || path.join(__dirname, 'public', 'images');
+const staticVideosPath = process.env.STATIC_VIDEOS_PATH || path.join(__dirname, 'public', 'videos');
+const docsPath = path.join(__dirname, 'docs'); // Directory for the documentation
 
 app.use(cors());
 app.use(express.json());
 app.use('/images', express.static(staticImagesPath));
 app.use('/videos', express.static(staticVideosPath));
-app.use('/docs', express.static(docsPath)); 
+app.use('/docs', express.static(docsPath));
+
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(docsPath, 'index.html'));
+});
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -40,7 +45,7 @@ const apiKeyMiddleware = (req, res, next) => {
     }
 };
 
-// Apply API key middleware to all routes except documentation
+
 app.use('/videos', apiKeyMiddleware);
 app.use('/videos/:id', apiKeyMiddleware);
 app.use('/videos/:id/comments', apiKeyMiddleware);
