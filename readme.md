@@ -15,7 +15,7 @@ This project is a simple API for managing a video platform built with Express.js
 1. **Clone the repository:**
 
     ```sh
-    git clone https://github.com/yourusername/videoplatform.git
+    git clone https://github.com/Martikk/BrainFlix_back
     cd videoplatform
     ```
 
@@ -36,6 +36,32 @@ This project is a simple API for managing a video platform built with Express.js
     ```sh
     npm start
     ```
+
+## API Documentation
+
+For detailed information on how to use the API, please refer to the [API Documentation](https://brainflixback-f347c94ccf8f.herokuapp.com/).
+
+## Using the API
+
+1. **Register for an API Key**: 
+
+    To register with the API and get a key, make a GET request to `/register`. You can do this with your browser, and you only need to do it once. Store the key in a global variable in your website.
+
+    ```sh
+    GET https://brainflixback-f347c94ccf8f.herokuapp.com/register
+    ```
+
+    Example response:
+
+    ```json
+    {
+      "api_key": "your_generated_api_key"
+    }
+    ```
+
+2. **Include the API Key in Requests**: 
+
+    For each of your API requests (except for `/register`), append `?api_key=your_api_key` to the URL.
 
 ## API Endpoints
 
@@ -103,7 +129,3 @@ Like a video.
 ## Contributing
 
 Feel free to open issues or submit pull requests for any improvements or bug fixes.
-
-## License
-
-This project is licensed under the MIT License.
