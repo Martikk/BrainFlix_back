@@ -4,6 +4,8 @@ const { v4: uuidv4 } = require('uuid');
 const path = require('path');
 const cors = require('cors');
 const multer = require('multer');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('cloudinary').v2;
 const knex = require('knex');
 const knexConfig = require('./knexfile');
 
@@ -11,27 +13,29 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 const API_KEY = process.env.API_KEY || 'martik';
 const db = knex(knexConfig[process.env.NODE_ENV || 'development']);
-const staticImagesPath = process.env.STATIC_IMAGES_PATH || path.join(__dirname, 'public', 'images');
-const staticVideosPath = process.env.STATIC_VIDEOS_PATH || path.join(__dirname, 'public', 'videos');
-const docsPath = path.join(__dirname, 'docs'); 
+const docsPath = path.join(__dirname, 'docs');
 
 app.use(cors());
 app.use(express.json());
-app.use('/images', express.static(staticImagesPath));
-app.use('/videos', express.static(staticVideosPath));
 app.use('/docs', express.static(docsPath));
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(docsPath, 'index.html'));
 });
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'public/images');
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'uploads',
+    resource_type: 'image', // Only allow image uploads
+    public_id: (req, file) => `${Date.now()}-${file.originalname}`
   },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  }
 });
 
 const upload = multer({ storage });
@@ -54,14 +58,6 @@ app.use('/videos/:id/like', apiKeyMiddleware);
 app.get('/videos', async (req, res) => {
   try {
     const videos = await db('videos').select();
-    videos.forEach(video => {
-      if (!video.image.startsWith('http')) {
-        video.image = `${req.protocol}://${req.get('host')}${video.image}`;
-      }
-      if (!video.video.startsWith('http')) {
-        video.video = `${req.protocol}://${req.get('host')}${video.video}`;
-      }
-    });
     res.json(videos);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching videos' });
@@ -72,12 +68,6 @@ app.get('/videos/:id', async (req, res) => {
   try {
     const video = await db('videos').where({ id: req.params.id }).first();
     if (video) {
-      if (!video.image.startsWith('http')) {
-        video.image = `${req.protocol}://${req.get('host')}${video.image}`;
-      }
-      if (!video.video.startsWith('http')) {
-        video.video = `${req.protocol}://${req.get('host')}${video.video}`;
-      }
       const comments = await db('comments').where({ video_id: req.params.id });
       video.comments = comments;
       res.json(video);
@@ -92,7 +82,7 @@ app.get('/videos/:id', async (req, res) => {
 app.post('/videos', upload.single('image'), async (req, res) => {
   try {
     const { title, description, channel } = req.body;
-    const imageUrl = req.file ? `/images/${req.file.filename}` : '/images/default-thumbnail.jpg';
+    const imageUrl = req.file ? req.file.path : null;
     const newVideo = {
       id: uuidv4(),
       title,
@@ -102,12 +92,10 @@ app.post('/videos', upload.single('image'), async (req, res) => {
       views: '0',
       likes: '0',
       duration: '0:00',
-      video: '/videos/stream.mp4',
+      video: '', // Leave video URL empty since we are only uploading images
       timestamp: Date.now()
     };
     await db('videos').insert(newVideo);
-    newVideo.image = `${req.protocol}://${req.get('host')}${newVideo.image}`;
-    newVideo.video = `${req.protocol}://${req.get('host')}${newVideo.video}`;
     res.status(201).json(newVideo);
   } catch (error) {
     res.status(500).json({ message: 'Error creating video' });
