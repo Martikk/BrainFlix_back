@@ -13,7 +13,7 @@ const API_KEY = process.env.API_KEY || 'martik';
 const db = knex(knexConfig[process.env.NODE_ENV || 'development']);
 const staticImagesPath = process.env.STATIC_IMAGES_PATH || path.join(__dirname, 'public', 'images');
 const staticVideosPath = process.env.STATIC_VIDEOS_PATH || path.join(__dirname, 'public', 'videos');
-const docsPath = path.join(__dirname, 'docs');
+const docsPath = path.join(__dirname, 'docs'); 
 
 app.use(cors());
 app.use(express.json());
@@ -64,7 +64,6 @@ app.get('/videos', async (req, res) => {
     });
     res.json(videos);
   } catch (error) {
-    console.error('Error fetching videos:', error);
     res.status(500).json({ message: 'Error fetching videos' });
   }
 });
@@ -79,12 +78,13 @@ app.get('/videos/:id', async (req, res) => {
       if (!video.video.startsWith('http')) {
         video.video = `${req.protocol}://${req.get('host')}${video.video}`;
       }
+      const comments = await db('comments').where({ video_id: req.params.id });
+      video.comments = comments;
       res.json(video);
     } else {
       res.status(404).json({ message: 'Video not found' });
     }
   } catch (error) {
-    console.error('Error fetching video:', error);
     res.status(500).json({ message: 'Error fetching video' });
   }
 });
@@ -103,15 +103,13 @@ app.post('/videos', upload.single('image'), async (req, res) => {
       likes: '0',
       duration: '0:00',
       video: '/videos/stream.mp4',
-      timestamp: Date.now(),
-      comments: []
+      timestamp: Date.now()
     };
     await db('videos').insert(newVideo);
     newVideo.image = `${req.protocol}://${req.get('host')}${newVideo.image}`;
     newVideo.video = `${req.protocol}://${req.get('host')}${newVideo.video}`;
     res.status(201).json(newVideo);
   } catch (error) {
-    console.error('Error creating video:', error);
     res.status(500).json({ message: 'Error creating video' });
   }
 });
@@ -135,7 +133,6 @@ app.post('/videos/:id/comments', async (req, res) => {
       res.status(404).json({ message: 'Video not found' });
     }
   } catch (error) {
-    console.error('Error adding comment:', error);
     res.status(500).json({ message: 'Error adding comment' });
   }
 });
@@ -150,7 +147,6 @@ app.delete('/videos/:id/comments/:commentId', async (req, res) => {
       res.status(404).json({ message: 'Video not found' });
     }
   } catch (error) {
-    console.error('Error deleting comment:', error);
     res.status(500).json({ message: 'Error deleting comment' });
   }
 });
@@ -166,7 +162,6 @@ app.post('/videos/:id/like', async (req, res) => {
       res.status(404).json({ message: 'Video not found' });
     }
   } catch (error) {
-    console.error('Error liking video:', error);
     res.status(500).json({ message: 'Error liking video' });
   }
 });
